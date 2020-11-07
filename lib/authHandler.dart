@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 FirebaseAuth _auth = FirebaseAuth.instance;
 
-class LoginIslemleri extends StatefulWidget {
+class AuthHandler extends StatefulWidget {
   @override
-  _LoginIslemleriState createState() => _LoginIslemleriState();
+  _AuthHandlerState createState() => _AuthHandlerState();
 }
 
-class _LoginIslemleriState extends State<LoginIslemleri> {
+class _AuthHandlerState extends State<AuthHandler> {
   String mail="";
   String pass="";
 
