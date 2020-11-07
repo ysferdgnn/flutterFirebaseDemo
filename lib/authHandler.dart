@@ -1,8 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_demo/AuthActionHandlers/AuthActionHandler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-FirebaseAuth _auth = FirebaseAuth.instance;
+
 
 class AuthHandler extends StatefulWidget {
   @override
@@ -19,13 +19,7 @@ class _AuthHandlerState extends State<AuthHandler> {
   Widget build(BuildContext context) {
     width = MediaQuery.of(context).size.width/10*6;
     height=MediaQuery.of(context).size.height;
-    _auth.authStateChanges().listen((User user) {
-      if (user == null) {
-        print('User is currently signed out!');
-      } else {
-        print('User is signed in!');
-      }
-    });
+
 
     return Scaffold(
         appBar: AppBar(
@@ -70,33 +64,10 @@ class _AuthHandlerState extends State<AuthHandler> {
               Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
-                    SizedBox(
-                      width: this.width,
-                      child: RaisedButton(
-                        elevation: 12,
-                        color: Colors.greenAccent,
-                        child: Text("User Create"),
-                        onPressed: _createUser,
-                      ),
-                    ),
-                    SizedBox(
-                      width: this.width,
-                      child: RaisedButton(
-                        elevation: 12,
-                        color: Colors.blueAccent,
-                        child: Text("User Login"),
-                        onPressed: _signIn,
-                      ),
-                    ),
-                    SizedBox(
-                      width: this.width,
-                      child: RaisedButton(
-                        elevation: 12,
-                        color: Colors.redAccent,
-                        child: Text("User Sign-Out"),
-                        onPressed: _signOut,
-                      ),
-                    )
+                    actionButton(Colors.greenAccent, "User Create", (){AuthActionHandler().createUser(this.mail, this.pass, _showMyDialog);}),
+                    actionButton(Colors.blueAccent, "User Login", (){AuthActionHandler().signIn(this.mail, this.pass, _showMyDialog);}),
+                    actionButton(Colors.redAccent, "User Sign-Out", (){AuthActionHandler().signOut(_showMyDialog);})
+
                   ],
                 ),
 
@@ -105,56 +76,20 @@ class _AuthHandlerState extends State<AuthHandler> {
         ));
   }
 
-  void _createUser() async {
-    if (this.mail != "" && this.pass != "") {
-      try {
-        debugPrint("Mail: " + this.mail);
-        debugPrint("Pass: " + this.pass);
-        UserCredential _userCredential =
-            await _auth.createUserWithEmailAndPassword(
-                email: this.mail, password: this.pass);
-        User _newUser = _userCredential.user;
-        await _newUser.sendEmailVerification();
-        debugPrint(_userCredential.user.toString());
-        _showMyDialog(
-            "Create User Successful sended a verification mail.Please verify your account");
-      } catch (e) {
-        debugPrint(e.toString());
-        _showMyDialog("An error occurred on create user: " + e.toString());
-      }
-    }
-  }
 
-  void _signIn() async {
-    if (this.mail != "" && this.pass != "") {
-      try {
-        debugPrint("Mail: " + this.mail);
-        debugPrint("Pass: " + this.pass);
-        UserCredential _userCredential = await _auth.signInWithEmailAndPassword(
-            email: this.mail, password: this.pass);
-        if (!_userCredential.user.emailVerified) {
-          _showMyDialog("Please verify your account");
-          debugPrint("Email not verified");
-          _auth.signOut();
-        }
-        debugPrint(_userCredential.user.toString());
-        _showMyDialog("SignIn successful");
-      } catch (e) {
-        debugPrint(e.toString());
-        _showMyDialog(" An error occurred on  sign-In:" + e.toString());
-      }
-    }
-  }
 
-  void _signOut() async {
-    if (_auth.currentUser != null) {
-      try {
-        await _auth.signOut();
-        _showMyDialog("SignOut successful");
-      } catch (e) {
-        _showMyDialog(" An error occurred on  sign-Out:" + e.toString());
-      }
-    }
+
+
+  Widget actionButton(Color _color,String _msg,Function _method){
+    return SizedBox(
+      width: this.width,
+      child: RaisedButton(
+        elevation: 12,
+        color: _color,
+        child: Text(_msg),
+        onPressed: _method,
+      ),
+    );
   }
 
   Future<void> _showMyDialog(String _message) async {
